@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group Idea Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #fffdf7;
+    --ink: #1a1208;
+    --muted: #7a6e5f;
+    --accent: #e84b1e;
+    --accent2: #2563eb;
+    --border: #d4cfc6;
+    --shadow: 0 4px 24px rgba(30,20,10,0.10);
+    --colors: #fde68a, #a7f3d0, #bfdbfe, #fca5a5, #ddd6fe, #fed7aa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    color: var(--ink);
+    background-image:
+      radial-gradient(circle at 20% 80%, #fde68a33 0%, transparent 40%),
+      radial-gradient(circle at 80% 10%, #bfdbfe33 0%, transparent 40%);
+  }
+
+  /* HEADER */
+  header {
+    padding: 2.5rem 2.5rem 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(30,20,10,0.06);
+  }
+
+  .header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .header-left h1 span { color: var(--accent); }
+
+  .header-left p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+
+  #idea-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .count-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ADD IDEA SECTION */
+  .add-section {
+    max-width: 700px;
+    margin: 2.5rem auto 0;
+    padding: 0 1.5rem;
+  }
+
+  .add-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    padding: 1.8rem 2rem;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+
+  .add-card:focus-within {
+    box-shadow: 0 8px 36px rgba(232,75,30,0.12);
+    border-color: var(--accent);
+  }
+
+  .add-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .add-card h2::before {
+    content: "✦";
+    color: var(--accent);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .form-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: var(--bg);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    resize: none;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  .form-group textarea { height: 80px; }
+
+  .color-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.1rem;
+  }
+
+  .color-row label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-right: 0.3rem;
+  }
+
+  .color-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+
+  .color-dot:hover { transform: scale(1.15); }
+  .color-dot.selected { border-color: var(--ink); transform: scale(1.2); }
+
+  .submit-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .submit-btn:hover { background: #c73a12; transform: translateY(-1px); }
+  .submit-btn:active { transform: translateY(0); }
+
+  /* BOARD */
+  .board-header {
+    max-width: 1200px;
+    margin: 2.5rem auto 0.8rem;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .board-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .divider {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+  }
+
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  /* CARDS GRID */
+  .board {
+    max-width: 1200px;
+    margin: 0 auto 4rem;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .idea-card {
+    border-radius: 16px;
+    padding: 1.4rem 1.5rem 1.2rem;
+    box-shadow: 3px 6px 20px rgba(30,20,10,0.10);
+    position: relative;
+    overflow: hidden;
+    animation: cardIn 0.35s cubic-bezier(.22,1,.36,1) both;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-height: 170px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(22px) rotate(-1.5deg) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  }
+
+  .idea-card:hover {
+    transform: translateY(-4px) rotate(0.5deg);
+    box-shadow: 6px 12px 32px rgba(30,20,10,0.14);
+  }
+
+  /* Pin decoration */
+  .idea-card::before {
+    content: "📌";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.3rem;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18));
+  }
+
+  .card-tag {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: rgba(0,0,0,0.10);
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    margin-bottom: 0.6rem;
+    color: rgba(0,0,0,0.55);
+  }
+
+  .card-idea {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #1a1208;
+    flex: 1;
+    margin-bottom: 1rem;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(0,0,0,0.55);
+    text-transform: uppercase;
+  }
+
+  .author-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: rgba(0,0,0,0.65);
+  }
+
+  .card-date {
+    font-size: 0.72rem;
+    color: rgba(0,0,0,0.4);
+  }
+
+  .like-btn {
+    background: rgba(0,0,0,0.10);
+    border: none;
+    border-radius: 20px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: background 0.15s, transform 0.1s;
+    color: rgba(0,0,0,0.5);
+  }
+
+  .like-btn:hover { background: rgba(0,0,0,0.18); transform: scale(1.05); }
+  .like-btn.liked { background: rgba(232,75,30,0.18); color: var(--accent); }
+
+  /* Empty state */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+  }
+
+  .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-state p { font-size: 1rem; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--ink);
+    color: #fff;
+    padding: 0.8rem 1.4rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+    z-index: 999;
+    animation: toastIn 0.3s ease both;
+  }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    header { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 1.5rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .board-header { flex-wrap: wrap; }
+    .filter-row { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Idea <span>Board</span></h1>
+    <p>Capture, share, and celebrate group ideas</p>
+  </div>
+  <div style="text-align:right">
+    <div id="idea-count">0</div>
+    <div class="count-label">Ideas shared</div>
+  </div>
+</header>
+
+<!-- ADD IDEA FORM -->
+<div class="add-section">
+  <div class="add-card">
+    <h2>Post a New Idea</h2>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Your Name</label>
+      <input type="text" id="input-name" placeholder="e.g. Sarah Chen" maxlength="40">
+    </div>
+    <div class="form-group" style="margin-bottom:1rem">
+      <label>Your Idea</label>
+      <textarea id="input-idea" placeholder="Describe your idea here..."></textarea>
+    </div>
+    <div class="color-row">
+      <label>Card Color</label>
+      <div class="color-dot selected" style="background:#fde68a" data-color="#fde68a" onclick="selectColor(this)"></div>
+      <div class="color-dot" style="background:#a7f3d0" data-color="#a7f3d0" onclick="selectColor(this)"></div>
+      <div class="color-dot" style="background:#bfdbfe" data-color="#bfdbfe" onclick="selectColor(this)"></div>
+      <div class="color-dot" style="background:#fca5a5" data-color="#fca5a5" onclick="selectColor(this)"></div>
+      <div class="color-dot" style="background:#ddd6fe" data-color="#ddd6fe" onclick="selectColor(this)"></div>
+      <div class="color-dot" style="background:#fed7aa" data-color="#fed7aa" onclick="selectColor(this)"></div>
+    </div>
+    <button class="submit-btn" onclick="addIdea()">✦ Post Idea to Board</button>
+  </div>
+</div>
+
+<!-- BOARD HEADER + FILTER -->
+<div class="board-header">
+  <h2>All Ideas</h2>
+  <div class="divider"></div>
+
+</div>
+
+<!-- BOARD -->
+<div class="board" id="board"></div>
+
+<script>
+  let ideas = [
+    { id: 1, name: "Alex Rivera", idea: "Create a weekly 'innovation hour' where team members can freely explore new tools and share findings.", color: "#fde68a", date: "Mar 5", likes: 7, liked: false },
+    { id: 2, name: "Priya Sharma", idea: "Add dark mode to our dashboard — users have been requesting it and it'll reduce eye strain significantly.", color: "#bfdbfe", date: "Mar 6", likes: 12, liked: false },
+    { id: 3, name: "Jordan Lee", idea: "Redesign the onboarding flow with interactive tooltips rather than a static welcome email.", color: "#a7f3d0", date: "Mar 7", likes: 5, liked: false },
+    { id: 4, name: "Sam Torres", idea: "Partner with micro-influencers in our niche for authentic product reviews before the Q2 launch.", color: "#fed7aa", date: "Mar 8", likes: 9, liked: false },
+  ];
+
+  let selectedColor = "#fde68a";
+  let nextId = 5;
+
+  function selectColor(el) {
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedColor = el.dataset.color;
+  }
+
+  function initials(name) {
+    return name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+  }
+
+  function formatDate() {
+    return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function addIdea() {
+    const name = document.getElementById('input-name').value.trim();
+    const idea = document.getElementById('input-idea').value.trim();
+
+    if (!name) { showToast("Please enter your name! 👤"); return; }
+    if (!idea) { showToast("Please write your idea! 💡"); return; }
+
+    ideas.unshift({ id: nextId++, name, idea, color: selectedColor, date: formatDate(), likes: 0, liked: false });
+    document.getElementById('input-name').value = '';
+    document.getElementById('input-idea').value = '';
+    renderBoard();
+    showToast("Idea posted! ✦");
+    window.scrollTo({ top: document.querySelector('.board-header').offsetTop - 80, behavior: 'smooth' });
+  }
+
+  function toggleLike(id) {
+    const idea = ideas.find(i => i.id === id);
+    if (!idea) return;
+    idea.liked = !idea.liked;
+    idea.likes += idea.liked ? 1 : -1;
+    renderBoard();
+  }
+
+  function renderBoard() {
+    const board = document.getElementById('board');
+
+    document.getElementById('idea-count').textContent = ideas.length;
+
+    if (ideas.length === 0) {
+      board.innerHTML = `<div class="empty-state"><div class="icon">🗒️</div><p>No ideas yet. Be the first to post one!</p></div>`;
+      return;
+    }
+
+    board.innerHTML = ideas.map((idea, index) => `
+      <div class="idea-card" style="background:${idea.color}; animation-delay:${index * 0.05}s">
+        <div>
+          <div class="card-idea">${escapeHTML(idea.idea)}</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-author">
+            <div class="avatar">${initials(idea.name)}</div>
+            <div>
+              <div class="author-name">${escapeHTML(idea.name)}</div>
+              <div class="card-date">${idea.date}</div>
+            </div>
+          </div>
+          <button class="like-btn ${idea.liked ? 'liked' : ''}" onclick="toggleLike(${idea.id})">
+            ${idea.liked ? '❤️' : '🤍'} ${idea.likes}
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHTML(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showToast(msg) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2800);
+  }
+
+  renderBoard();
+</script>
+</body>
+</html>
