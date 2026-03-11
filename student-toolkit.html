@@ -644,14 +644,68 @@
     margin-top: 2px;
   }
 
-  /* Responsive */
+  /* Responsive — Tablet */
+  @media (max-width: 768px) {
+    .ideas-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .stats-row { gap: 10px; }
+    .card { padding: 20px; }
+    .gpa-big { font-size: 3rem; }
+    .section-header h2 { font-size: 1.35rem; }
+    .board-input-row { flex-wrap: wrap; }
+    .board-input-row input[style*="max-width"] { max-width: 100% !important; }
+    .btn-add { width: 100%; }
+  }
+
+  /* Responsive — Mobile */
   @media (max-width: 600px) {
-    nav { padding: 0 16px; gap: 6px; }
-    .nav-btn { padding: 8px 12px; font-size: 0.78rem; }
-    .nav-logo { font-size: 1rem; }
-    .course-row { grid-template-columns: 1fr 90px 80px 38px; gap: 6px; }
-    .hero { padding: 48px 16px 32px; }
-    .main { padding: 0 16px 60px; }
+    nav {
+      padding: 0 12px;
+      gap: 5px;
+      height: auto;
+      min-height: 56px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .nav-logo { font-size: 0.95rem; width: 100%; margin-right: 0; }
+    .nav-btn { padding: 7px 10px; font-size: 0.75rem; flex: 1; text-align: center; }
+    .theme-toggle { width: 36px; height: 36px; font-size: 15px; }
+    .hero { padding: 36px 14px 24px; }
+    .hero h1 { font-size: clamp(1.9rem, 9vw, 2.8rem); }
+    .hero p { font-size: 0.95rem; }
+    .main { padding: 0 14px 60px; }
+    .card { padding: 16px; border-radius: 12px; }
+    .section-header { gap: 10px; margin-bottom: 20px; }
+    .section-icon { width: 40px; height: 40px; font-size: 18px; }
+    .section-header h2 { font-size: 1.2rem; }
+
+    /* GPA */
+    .course-row { grid-template-columns: 1fr 80px 72px 36px; gap: 6px; }
+    .gpa-result { flex-direction: column; gap: 12px; }
+    .gpa-big { font-size: 2.6rem; }
+    .gpa-bar-wrap { min-width: 0; width: 100%; }
+    .btn-primary, .btn-secondary { padding: 11px 16px; font-size: 0.85rem; }
+
+    /* Timer */
+    .timer-modes { gap: 6px; }
+    .mode-btn { font-size: 0.78rem; padding: 8px 6px; }
+    .timer-big { font-size: clamp(3rem, 14vw, 5rem); }
+    .btn-timer { padding: 11px 20px; font-size: 0.85rem; }
+
+    /* Idea Board */
+    .board-input-row {
+      flex-direction: column;
+      gap: 8px;
+    }
+    .board-input-row input,
+    .board-input-row input[style*="max-width"] {
+      max-width: 100% !important;
+      width: 100%;
+    }
+    .btn-add { width: 100%; padding: 12px; font-size: 0.9rem; }
+    .ideas-grid { grid-template-columns: 1fr; }
+    .stats-row { flex-direction: column; gap: 8px; }
+    .stat-chip { min-width: 0; }
   }
 </style>
 </head>
@@ -784,7 +838,7 @@
     <div class="card">
       <div class="board-input-row">
         <input type="text" id="ideaAuthor" placeholder="Your name…" style="max-width:160px;" onkeydown="if(event.key==='Enter')document.getElementById('ideaInput').focus()">
-        <input type="text" id="ideaInput" placeholder="Type an idea and press Enter or click Add…" onkeydown="if(event.key==='Enter')addIdea()">
+        <input type="text" id="ideaInput" placeholder="Type an idea and press Enter or click Add… (max 150 chars)" maxlength="150" onkeydown="if(event.key==='Enter')addIdea()">
         <button class="btn-add" onclick="addIdea()">+ Add</button>
       </div>
 
@@ -988,21 +1042,109 @@ updateDisplay();
 updateStats();
 
 // ─── IDEA BOARD ──────────────────────────────────────
-let ideas = [];
+const IDEA_MAX_CHARS = 150;
+const SPECIAL_CHAR_REGEX = /[^a-zA-Z0-9 .,!?'"\-()&@#%:;]/;
+const STORAGE_KEY = 'studentToolkit_ideas';
+
+// Load ideas from localStorage, or seed defaults if first visit
+function loadIdeas() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch(e) {}
+  // Default seed ideas (only shown on first visit)
+  return [
+    { id: Date.now() + 1, text: "Use spaced repetition for exam prep", author: "Aisha", time: '–' },
+    { id: Date.now() + 2, text: "Create shared Google Drive folder for resources", author: "Marco", time: '–' },
+    { id: Date.now() + 3, text: "Design a colourful summary poster", author: "Priya", time: '–' },
+  ];
+}
+
+function saveIdeas() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+  } catch(e) {}
+}
+
+let ideas = loadIdeas();
+
+function showIdeaError(msg) {
+  const input = document.getElementById('ideaInput');
+  let err = document.getElementById('ideaError');
+  if (!err) {
+    err = document.createElement('div');
+    err.id = 'ideaError';
+    err.style.cssText = 'color:#fa6d6d;font-size:0.8rem;margin-top:6px;';
+    input.parentNode.insertBefore(err, input.nextSibling);
+  }
+  err.textContent = msg;
+  clearTimeout(showIdeaError._t);
+  showIdeaError._t = setTimeout(() => { err.textContent = ''; }, 3000);
+}
+
+function updateCharCounter() {
+  const input = document.getElementById('ideaInput');
+  const val = input.value;
+  let counter = document.getElementById('ideaCharCount');
+  if (!counter) {
+    counter = document.createElement('span');
+    counter.id = 'ideaCharCount';
+    counter.style.cssText = 'font-size:0.75rem;color:var(--muted);margin-left:8px;';
+    input.insertAdjacentElement('afterend', counter);
+  }
+  const remaining = IDEA_MAX_CHARS - val.length;
+  counter.textContent = remaining + ' chars left';
+  counter.style.color = remaining < 20 ? '#fa6d6d' : 'var(--muted)';
+}
 
 function addIdea() {
   const input = document.getElementById('ideaInput');
   const authorInput = document.getElementById('ideaAuthor');
-  const text = input.value.trim();
+  const raw = input.value.trim();
   const author = authorInput.value.trim() || 'Anonymous';
-  if (!text) { input.focus(); return; }
-  ideas.unshift({ id: Date.now(), text, author, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+
+  if (!raw) { input.focus(); return; }
+
+  // Validate: no special characters
+  if (SPECIAL_CHAR_REGEX.test(raw)) {
+    showIdeaError('⚠ Special characters are not allowed. Use letters, numbers and basic punctuation only.');
+    input.focus();
+    return;
+  }
+
+  // Validate: max 150 characters
+  if (raw.length > IDEA_MAX_CHARS) {
+    showIdeaError('⚠ Idea must be ' + IDEA_MAX_CHARS + ' characters or fewer.');
+    input.focus();
+    return;
+  }
+
+  // Check for duplicate (case-insensitive)
+  const lowerRaw = raw.toLowerCase();
+  const isDuplicate = ideas.some(i => i.text.toLowerCase() === lowerRaw);
+  if (isDuplicate) {
+    showIdeaError('⚠ This idea already exists on the board.');
+    input.focus();
+    return;
+  }
+
+  ideas.unshift({
+    id: Date.now(),
+    text: raw,
+    author,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
   input.value = '';
+  updateCharCounter();
+  saveIdeas();
   renderIdeas();
 }
 
 function deleteIdea(id) {
   ideas = ideas.filter(i => i.id !== id);
+  saveIdeas();
   renderIdeas();
 }
 
@@ -1029,15 +1171,11 @@ function escapeHtml(t) {
   return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Seed ideas
-[
-  { text: "Use spaced repetition for exam prep", author: "Aisha" },
-  { text: "Create shared Google Drive folder for resources", author: "Marco" },
-  { text: "Design a colourful summary poster", author: "Priya" },
-].forEach(({ text, author }) => {
-  ideas.push({ id: Date.now() + Math.random(), text, author, time: '–' });
-});
+// Attach live char counter
+document.getElementById('ideaInput').addEventListener('input', updateCharCounter);
+
 renderIdeas();
+updateCharCounter();
 </script>
 </body>
 </html>
