@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Toolkit</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #2a0a0f;
+    --surface: #3a1018;
+    --card: #451520;
+    --border: #6b2030;
+    --accent1: #c9a84c;
+    --accent2: #e8c96a;
+    --accent3: #f0d890;
+    --accent4: #8b1a2a;
+    --text: #fdf3e0;
+    --muted: #c4956a;
+    --radius: 16px;
+    --nav-bg: rgba(42,10,15,0.92);
+  }
+
+  body.light-mode {
+    --bg: #fdf6e8;
+    --surface: #fff8ee;
+    --card: #ffffff;
+    --border: #e8d5a0;
+    --text: #2a0a0f;
+    --muted: #8b5e3c;
+    --nav-bg: rgba(253,246,232,0.95);
+  }
+
+  body.light-mode::before {
+    background-image:
+      linear-gradient(rgba(201,168,76,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.08) 1px, transparent 1px);
+  }
+
+  body.light-mode .card,
+  body.light-mode .stat-chip,
+  body.light-mode .idea-card {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 18px;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--accent1);
+    color: var(--text);
+    transform: rotate(20deg) scale(1.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 68px;
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--text);
+    margin-right: auto;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-logo span {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #8b1a2a, #c9a84c);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .nav-logo-img {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid var(--accent1);
+    flex-shrink: 0;
+  }
+
+  .nav-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 9px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .nav-btn:hover {
+    color: var(--text);
+    border-color: var(--accent1);
+    transform: translateY(-1px);
+  }
+
+  .nav-btn.active {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .nav-btn.active.gpa  { background: rgba(201,168,76,0.2); border-color: var(--accent1); color: #e8c96a; }
+  .nav-btn.active.timer { background: rgba(139,26,42,0.3); border-color: #c0394f; color: #f0a0aa; }
+  .nav-btn.active.board { background: rgba(201,168,76,0.15); border-color: var(--accent2); color: var(--accent2); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 72px 32px 48px;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    background: linear-gradient(135deg, var(--text) 30%, var(--accent1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 440px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* PANEL */
+  .panel {
+    display: none;
+    animation: fadeUp 0.35s ease;
+  }
+  .panel.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .section-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .gpa-icon  { background: rgba(201,168,76,0.2); }
+  .timer-icon { background: rgba(139,26,42,0.3); }
+  .board-icon { background: rgba(201,168,76,0.15); }
+
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .section-header p { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  /* GPA CALCULATOR */
+  .course-row {
+    display: grid;
+    grid-template-columns: 1fr 130px 110px 44px;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .course-row.header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+
+  input, select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    width: 100%;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus { border-color: var(--accent1); }
+  select option { background: var(--surface); }
+
+  .btn-icon {
+    background: rgba(250,100,100,0.1);
+    border: 1px solid rgba(250,100,100,0.2);
+    color: #fa6d6d;
+    border-radius: 8px;
+    width: 38px; height: 38px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-icon:hover { background: rgba(250,100,100,0.2); transform: scale(1.05); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #8b1a2a, #c9a84c);
+    border: none;
+    color: #fdf3e0;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139,26,42,0.45); }
+
+  .btn-secondary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { color: var(--text); border-color: var(--muted); }
+
+  .gpa-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .gpa-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #c9a84c, #8b1a2a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gpa-label { color: var(--muted); font-size: 0.85rem; margin-top: -8px; }
+
+  .gpa-bar-wrap {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .gpa-bar-track {
+    background: var(--surface);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .gpa-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #8b1a2a, #c9a84c);
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+
+  .gpa-status {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  /* TIMER */
+  .timer-modes {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .mode-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .mode-btn.active {
+    background: rgba(250,109,155,0.15);
+    border-color: var(--accent2);
+    color: #fd9dbb;
+    font-weight: 600;
+  }
+
+  .timer-display {
+    text-align: center;
+    padding: 40px 0 32px;
+  }
+
+  .timer-big {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+
+  .timer-big.running { color: #e8c96a; }
+  .timer-phase { color: var(--muted); font-size: 0.9rem; margin-top: 12px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  .timer-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .btn-timer {
+    background: rgba(201,168,76,0.2);
+    border: 1px solid rgba(201,168,76,0.4);
+    color: #e8c96a;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 12px 28px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-timer:hover { background: rgba(201,168,76,0.35); transform: translateY(-1px); }
+  .btn-timer.reset { background: var(--surface); border-color: var(--border); color: var(--muted); }
+  .btn-timer.reset:hover { color: var(--text); }
+
+  .timer-progress-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 32px;
+  }
+
+  .timer-progress-ring svg {
+    transform: rotate(-90deg);
+  }
+
+  .timer-progress-track { stroke: var(--border); fill: none; }
+  .timer-progress-fill {
+    fill: none;
+    stroke: #c9a84c;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+  }
+
+  .ring-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sessions-count {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .session-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .session-dot.done { background: #c9a84c; }
+
+  /* IDEA BOARD */
+  .board-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .board-input-row input {
+    flex: 1;
+  }
+
+  .btn-add {
+    background: linear-gradient(135deg, #c9a84c, #e8c96a);
+    border: none;
+    color: #2a0a0f;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,168,76,0.4); }
+
+  .tag-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .tag-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .tag-btn.active, .tag-btn:hover {
+    background: rgba(109,250,204,0.12);
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+
+  .ideas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+
+  .idea-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    transition: all 0.2s;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .idea-card:hover {
+    border-color: rgba(109,250,204,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .idea-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+
+  .idea-text {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  .idea-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .idea-del {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    line-height: 1;
+  }
+
+  .idea-card:hover .idea-del { opacity: 1; }
+  .idea-del:hover { color: #fa6d6d; }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 0;
+    color: var(--muted);
+  }
+
+  .empty-state .emoji { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* STATS ROW */
+  .stats-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .stat-chip .val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .stat-chip .lbl {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  /* Responsive — Tablet */
+  @media (max-width: 768px) {
+    .ideas-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .stats-row { gap: 10px; }
+    .card { padding: 20px; }
+    .gpa-big { font-size: 3rem; }
+    .section-header h2 { font-size: 1.35rem; }
+    .board-input-row { flex-wrap: wrap; }
+    .board-input-row input[style*="max-width"] { max-width: 100% !important; }
+    .btn-add { width: 100%; }
+  }
+
+  /* Responsive — Mobile */
+  @media (max-width: 600px) {
+    nav {
+      padding: 0 12px;
+      gap: 5px;
+      height: auto;
+      min-height: 56px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .nav-logo { font-size: 0.95rem; width: 100%; margin-right: 0; }
+    .nav-btn { padding: 7px 10px; font-size: 0.75rem; flex: 1; text-align: center; }
+    .theme-toggle { width: 36px; height: 36px; font-size: 15px; }
+    .hero { padding: 36px 14px 24px; }
+    .hero h1 { font-size: clamp(1.9rem, 9vw, 2.8rem); }
+    .hero p { font-size: 0.95rem; }
+    .main { padding: 0 14px 60px; }
+    .card { padding: 16px; border-radius: 12px; }
+    .section-header { gap: 10px; margin-bottom: 20px; }
+    .section-icon { width: 40px; height: 40px; font-size: 18px; }
+    .section-header h2 { font-size: 1.2rem; }
+
+    /* GPA */
+    .course-row { grid-template-columns: 1fr 80px 72px 36px; gap: 6px; }
+    .gpa-result { flex-direction: column; gap: 12px; }
+    .gpa-big { font-size: 2.6rem; }
+    .gpa-bar-wrap { min-width: 0; width: 100%; }
+    .btn-primary, .btn-secondary { padding: 11px 16px; font-size: 0.85rem; }
+
+    /* Timer */
+    .timer-modes { gap: 6px; }
+    .mode-btn { font-size: 0.78rem; padding: 8px 6px; }
+    .timer-big { font-size: clamp(3rem, 14vw, 5rem); }
+    .btn-timer { padding: 11px 20px; font-size: 0.85rem; }
+
+    /* Idea Board */
+    .board-input-row {
+      flex-direction: column;
+      gap: 8px;
+    }
+    .board-input-row input,
+    .board-input-row input[style*="max-width"] {
+      max-width: 100% !important;
+      width: 100%;
+    }
+    .btn-add { width: 100%; padding: 12px; font-size: 0.9rem; }
+    .ideas-grid { grid-template-columns: 1fr; }
+    .stats-row { flex-direction: column; gap: 8px; }
+    .stat-chip { min-width: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div id="logoImgWrap" style="position:relative; cursor:pointer;">
+	<img src="data:image/png;base64,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" alt="UCSC Logo" style="height:38px;width:auto;object-fit:contain;">
+      
+    </div>
+    Student Toolkit
+  </div>
+  <button class="nav-btn gpa active" onclick="showPanel('gpa')">GPA Calculator</button>
+  <button class="nav-btn timer" onclick="showPanel('timer')">Study Timer</button>
+  <button class="nav-btn board" onclick="showPanel('board')">Group Idea Board</button>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="heroSection">
+  <h1>Your Academic<br>Command Center</h1>
+  <p>Three essential tools to help you track grades, manage study sessions, and collaborate on ideas.</p>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- GPA PANEL -->
+  <div class="panel active" id="panel-gpa">
+    <div class="section-header">
+      <div class="section-icon gpa-icon">📊</div>
+      <div>
+        <h2>GPA Calculator</h2>
+        <p>Add your courses, grades, and credits to calculate your GPA</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="course-row header">
+        <span>Course Name</span><span>Grade (A, B+, C…)</span><span>Credits</span><span></span>
+      </div>
+      <div id="courseList"></div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="btn-secondary" onclick="addCourse()">+ Add Course</button>
+        <button class="btn-primary" onclick="calcGPA()">Calculate GPA</button>
+      </div>
+    </div>
+
+    <div class="card" id="gpaResultCard" style="display:none;">
+      <div class="gpa-result">
+        <div>
+          <div class="gpa-big" id="gpaValue">0.00</div>
+          <div class="gpa-label">Cumulative GPA</div>
+        </div>
+        <div class="gpa-bar-wrap">
+          <div class="gpa-status" id="gpaStatus">—</div>
+          <div style="color:var(--muted); font-size:0.8rem; margin-top:4px;">out of 4.0</div>
+          <div class="gpa-bar-track"><div class="gpa-bar-fill" id="gpaBar"></div></div>
+          <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--muted); margin-top:4px;"><span>0.0</span><span>4.0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMER PANEL -->
+  <div class="panel" id="panel-timer">
+    <div class="section-header">
+      <div class="section-icon timer-icon">⏱️</div>
+      <div>
+        <h2>Study Timer</h2>
+        <p>Pomodoro-style focus sessions with break reminders</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="text-align:center; margin-bottom:8px;">
+        <span style="font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em;">🍅 Pomodoro · 25 min focus</span>
+      </div>
+
+      <div class="timer-progress-ring">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle class="timer-progress-track" cx="90" cy="90" r="80" stroke-width="8"/>
+          <circle class="timer-progress-fill" cx="90" cy="90" r="80" stroke-width="8"
+            id="progressCircle"
+            stroke-dasharray="502.65"
+            stroke-dashoffset="0"/>
+        </svg>
+        <div class="ring-inner">
+          <div class="timer-big" id="timerDisplay">25:00</div>
+          <div class="timer-phase" id="timerPhase">Focus</div>
+        </div>
+      </div>
+
+      <div class="timer-controls">
+        <button class="btn-timer reset" onclick="resetTimer()">↺ Reset</button>
+        <button class="btn-timer" id="startStopBtn" onclick="toggleTimer()">▶ Start</button>
+      </div>
+
+      <div class="sessions-count" id="sessionDots" style="margin-top:24px;"></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-chip">
+        <div class="val" id="statSessions" style="color:#c9a84c;">0</div>
+        <div class="lbl">Sessions</div>
+      </div>
+      <div class="stat-chip">
+        <div class="val" id="statFocusTime" style="color:#e8c96a;">0m</div>
+        <div class="lbl">Focus Time</div>
+      </div>
+      <div class="stat-chip">
+        <div class="val" id="statBreaks" style="color:#c0394f;">0</div>
+        <div class="lbl">Breaks</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARD PANEL -->
+  <div class="panel" id="panel-board">
+    <div class="section-header">
+      <div class="section-icon board-icon">💡</div>
+      <div>
+        <h2>Group Idea Board</h2>
+        <p>Capture and share your group's ideas with your name</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="board-input-row">
+        <input type="text" id="ideaAuthor" placeholder="Your name…" style="max-width:160px;" onkeydown="if(event.key==='Enter')document.getElementById('ideaInput').focus()" oninput="blockNumbersInName(this)">
+        <input type="text" id="ideaInput" placeholder="Type an idea and press Enter or click Add… (max 150 chars)" maxlength="150" onkeydown="if(event.key==='Enter')addIdea()">
+        <button class="btn-add" onclick="addIdea()">+ Add</button>
+      </div>
+
+      <div id="ideasGrid" class="ideas-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── LOGO UPLOAD ───────────────────────────────────
+function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = document.getElementById('logoImg');
+    const emoji = document.getElementById('logoEmoji');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    emoji.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─── THEME TOGGLE ──────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-mode');
+  document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+}
+
+// ─── NAV ───────────────────────────────────────────
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const btn = document.querySelector('.nav-btn.'+id);
+  if (btn) btn.classList.add('active');
+  document.getElementById('heroSection').style.display = 'none';
+}
+
+// ─── GPA CALCULATOR ─────────────────────────────────
+const gradeMap = {
+  'A+':4.0,'A':4.0,'A-':3.7,
+  'B+':3.3,'B':3.0,'B-':2.7,
+  'C+':2.3,'C':2.0,'C-':1.7,
+  'D+':1.3,'D':1.0,'D-':0.7,'F':0.0
+};
+
+let courseId = 0;
+function addCourse() {
+  const id = ++courseId;
+  const div = document.createElement('div');
+  div.className = 'course-row';
+  div.id = 'course-'+id;
+  div.innerHTML = `
+    <input type="text" placeholder="e.g. Mathematics" />
+    <input type="text" placeholder="e.g. A, B+, C-" maxlength="3" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" />
+    <input type="number" placeholder="Credits" min="1" max="6" value="3" style="text-align:center;" />
+    <button class="btn-icon" onclick="document.getElementById('course-${id}').remove()">✕</button>
+  `;
+  document.getElementById('courseList').appendChild(div);
+}
+
+function calcGPA() {
+  const rows = document.querySelectorAll('#courseList .course-row');
+  if (!rows.length) { addCourse(); return; }
+  let totalPoints = 0, totalCredits = 0;
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const grade = inputs[1].value.trim().toUpperCase();
+    const credits = parseFloat(inputs[2] ? inputs[2].value : 3) || 3;
+    inputs[1].style.borderColor = gradeMap.hasOwnProperty(grade) || !grade ? '' : '#fa6d6d';
+    if (gradeMap.hasOwnProperty(grade)) {
+      totalPoints += gradeMap[grade] * credits;
+      totalCredits += credits;
+    }
+  });
+  if (!totalCredits) { alert('Please enter at least one valid grade (e.g. A, B+, C-)'); return; }
+  const gpa = totalPoints / totalCredits;
+  document.getElementById('gpaValue').textContent = gpa.toFixed(2);
+  document.getElementById('gpaBar').style.width = (gpa / 4 * 100) + '%';
+  const statuses = [[3.7,'Summa Cum Laude 🏆'],[3.5,'Magna Cum Laude ⭐'],[3.0,'Cum Laude 🎓'],[2.0,'Satisfactory ✅'],[0,'Needs Improvement 📚']];
+  document.getElementById('gpaStatus').textContent = statuses.find(s => gpa >= s[0])[1];
+  const card = document.getElementById('gpaResultCard');
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Pre-populate 3 rows
+addCourse(); addCourse(); addCourse();
+
+// ─── STUDY TIMER ────────────────────────────────────
+let timerInterval = null;
+let totalSeconds = 25 * 60;
+let remainingSeconds = totalSeconds;
+let isRunning = false;
+let completedSessions = 0;
+let totalFocusSeconds = 0;
+let totalBreaks = 0;
+let currentModeType = 'focus';
+const circumference = 2 * Math.PI * 80;
+
+function setMode(mode, mins, idx) {
+  if (isRunning) toggleTimer();
+  document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  const customDiv = document.getElementById('customInput');
+  if (mode === 'custom') {
+    customDiv.style.display = 'block';
+    mins = parseInt(document.getElementById('customMin').value) || 45;
+  } else {
+    customDiv.style.display = 'none';
+  }
+  currentModeType = (mode === 'pomodoro' || mode === 'custom') ? 'focus' : 'break';
+  document.getElementById('timerPhase').textContent = currentModeType === 'focus' ? 'Focus' : 'Break';
+  totalSeconds = mins * 60;
+  remainingSeconds = totalSeconds;
+  updateDisplay();
+  document.getElementById('startStopBtn').textContent = '▶ Start';
+}
+
+function updateCustom() {
+  const v = parseInt(document.getElementById('customMin').value) || 45;
+  document.getElementById('customLabel').textContent = v+' min';
+  totalSeconds = v * 60;
+  remainingSeconds = totalSeconds;
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const m = Math.floor(remainingSeconds / 60).toString().padStart(2,'0');
+  const s = (remainingSeconds % 60).toString().padStart(2,'0');
+  document.getElementById('timerDisplay').textContent = m+':'+s;
+  const pct = remainingSeconds / totalSeconds;
+  const offset = circumference * (1 - pct);
+  document.getElementById('progressCircle').style.strokeDashoffset = offset;
+}
+
+function toggleTimer() {
+  if (isRunning) {
+    clearInterval(timerInterval);
+    isRunning = false;
+    document.getElementById('startStopBtn').textContent = '▶ Resume';
+    document.getElementById('timerDisplay').classList.remove('running');
+  } else {
+    isRunning = true;
+    document.getElementById('startStopBtn').textContent = '⏸ Pause';
+    document.getElementById('timerDisplay').classList.add('running');
+    timerInterval = setInterval(() => {
+      if (remainingSeconds <= 0) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        document.getElementById('startStopBtn').textContent = '▶ Start';
+        document.getElementById('timerDisplay').classList.remove('running');
+        if (currentModeType === 'focus') {
+          completedSessions++;
+          totalFocusSeconds += totalSeconds;
+        } else {
+          totalBreaks++;
+        }
+        updateStats();
+        const msg = currentModeType === 'focus' ? '✅ Session complete! Take a break.' : '🍅 Break over! Time to focus.';
+        if (Notification.permission === 'granted') {
+          new Notification('Student Toolkit', { body: msg });
+        }
+        alert(msg);
+        return;
+      }
+      remainingSeconds--;
+      if (currentModeType === 'focus') totalFocusSeconds++;
+      updateDisplay();
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  isRunning = false;
+  remainingSeconds = totalSeconds;
+  updateDisplay();
+  document.getElementById('startStopBtn').textContent = '▶ Start';
+  document.getElementById('timerDisplay').classList.remove('running');
+}
+
+function updateStats() {
+  document.getElementById('statSessions').textContent = completedSessions;
+  const mins = Math.floor(totalFocusSeconds / 60);
+  document.getElementById('statFocusTime').textContent = mins + 'm';
+  document.getElementById('statBreaks').textContent = totalBreaks;
+  // dots
+  const dots = document.getElementById('sessionDots');
+  dots.innerHTML = '';
+  for (let i = 0; i < Math.max(4, completedSessions+1); i++) {
+    const d = document.createElement('div');
+    d.className = 'session-dot' + (i < completedSessions ? ' done' : '');
+    dots.appendChild(d);
+  }
+}
+
+updateDisplay();
+updateStats();
+
+// ─── IDEA BOARD ──────────────────────────────────────
+const IDEA_MAX_CHARS = 150;
+
+// Allowed characters in idea text: letters, numbers, spaces, basic punctuation
+const SPECIAL_CHAR_REGEX = /[^a-zA-Z0-9 .,!?'"\-()&@#%:;]/;
+
+// Idea must contain at least one alphabetic character (a–z or A–Z)
+const HAS_ALPHA_REGEX = /[a-zA-Z]/;
+
+// Name field: only letters and spaces (hyphens/apostrophes for names like O'Brien, Mary-Jane)
+const NAME_INVALID_REGEX = /[^a-zA-Z '\-]/;
+
+const STORAGE_KEY = 'studentToolkit_ideas';
+
+// ── Block numbers & symbols from name field in real time ──
+function blockNumbersInName(input) {
+  // Strip any character that isn't a letter, space, hyphen, or apostrophe
+  const cleaned = input.value.replace(/[^a-zA-Z '\-]/g, '');
+  if (cleaned !== input.value) {
+    const cursor = input.selectionStart - (input.value.length - cleaned.length);
+    input.value = cleaned;
+    input.setSelectionRange(cursor, cursor);
+    showFieldError('nameError', '⚠ Name can only contain letters.');
+  }
+}
+
+// ── Generic field-level error display ──
+function showFieldError(id, msg) {
+  let err = document.getElementById(id);
+  if (!err) {
+    err = document.createElement('div');
+    err.id = id;
+    err.style.cssText = 'color:#fa6d6d;font-size:0.78rem;margin-top:4px;';
+    const anchor = id === 'nameError'
+      ? document.getElementById('ideaAuthor')
+      : document.getElementById('ideaInput');
+    anchor.insertAdjacentElement('afterend', err);
+  }
+  err.textContent = msg;
+  clearTimeout(err._timer);
+  err._timer = setTimeout(() => { err.textContent = ''; }, 3000);
+}
+
+// ── Load ideas from localStorage, seed defaults on first visit ──
+function loadIdeas() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch(e) {}
+  return [
+    { id: Date.now() + 1, text: "Use spaced repetition for exam prep",               author: "Aisha", time: '–' },
+    { id: Date.now() + 2, text: "Create shared Google Drive folder for resources",    author: "Marco", time: '–' },
+    { id: Date.now() + 3, text: "Design a colourful summary poster",                  author: "Priya", time: '–' },
+  ];
+}
+
+function saveIdeas() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas)); } catch(e) {}
+}
+
+let ideas = loadIdeas();
+
+// ── Live character counter on idea input ──
+function updateCharCounter() {
+  const input = document.getElementById('ideaInput');
+  let counter = document.getElementById('ideaCharCount');
+  if (!counter) {
+    counter = document.createElement('span');
+    counter.id = 'ideaCharCount';
+    counter.style.cssText = 'font-size:0.75rem;color:var(--muted);margin-left:8px;display:inline-block;margin-top:4px;';
+    input.insertAdjacentElement('afterend', counter);
+  }
+  const remaining = IDEA_MAX_CHARS - input.value.length;
+  counter.textContent = remaining + ' chars left';
+  counter.style.color = remaining < 20 ? '#fa6d6d' : 'var(--muted)';
+}
+
+// ── Add idea with full validation ──
+function addIdea() {
+  const input      = document.getElementById('ideaInput');
+  const authorInput = document.getElementById('ideaAuthor');
+  const raw        = input.value.trim();
+  const authorRaw  = authorInput.value.trim();
+  const author     = authorRaw || 'Anonymous';
+
+  // 1. Name field: must not contain numbers or special chars (already blocked live,
+  //    but double-check in case JS was bypassed)
+  if (authorRaw && NAME_INVALID_REGEX.test(authorRaw)) {
+    showFieldError('nameError', '⚠ Name can only contain letters.');
+    authorInput.focus();
+    return;
+  }
+
+  // 2. Idea must not be empty
+  if (!raw) {
+    showFieldError('ideaError', '⚠ Please enter an idea before adding.');
+    input.focus();
+    return;
+  }
+
+  // 3. Idea must contain at least one alphabetic character
+  if (!HAS_ALPHA_REGEX.test(raw)) {
+    showFieldError('ideaError', '⚠ Idea must contain at least one letter.');
+    input.focus();
+    return;
+  }
+
+  // 4. No disallowed special characters
+  if (SPECIAL_CHAR_REGEX.test(raw)) {
+    showFieldError('ideaError', '⚠ Special characters are not allowed. Use letters, numbers and basic punctuation only.');
+    input.focus();
+    return;
+  }
+
+  // 5. Max 150 characters
+  if (raw.length > IDEA_MAX_CHARS) {
+    showFieldError('ideaError', '⚠ Idea must be ' + IDEA_MAX_CHARS + ' characters or fewer.');
+    input.focus();
+    return;
+  }
+
+  // 6. No duplicates (case-insensitive)
+  if (ideas.some(i => i.text.toLowerCase() === raw.toLowerCase())) {
+    showFieldError('ideaError', '⚠ This idea already exists on the board.');
+    input.focus();
+    return;
+  }
+
+  ideas.unshift({
+    id: Date.now(),
+    text: raw,
+    author,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+
+  input.value = '';
+  updateCharCounter();
+  saveIdeas();
+  renderIdeas();
+}
+
+function deleteIdea(id) {
+  ideas = ideas.filter(i => i.id !== id);
+  saveIdeas();
+  renderIdeas();
+}
+
+function renderIdeas() {
+  const grid = document.getElementById('ideasGrid');
+  if (!ideas.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="emoji">💡</div><p>No ideas yet.<br>Add your first one above!</p></div>`;
+    return;
+  }
+  grid.innerHTML = ideas.map(idea => `
+    <div class="idea-card">
+      <button class="idea-del" onclick="deleteIdea(${idea.id})">✕</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8b1a2a,#c9a84c);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fdf3e0;flex-shrink:0;">${escapeHtml(idea.author.charAt(0).toUpperCase())}</div>
+        <span style="font-size:0.82rem;font-weight:600;color:#e8c96a;">${escapeHtml(idea.author)}</span>
+      </div>
+      <div class="idea-text">${escapeHtml(idea.text)}</div>
+      <div class="idea-meta">Added at ${idea.time}</div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('ideaInput').addEventListener('input', updateCharCounter);
+
+renderIdeas();
+updateCharCounter();
+</script>
+</body>
+</html>
